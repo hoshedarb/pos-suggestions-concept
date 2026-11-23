@@ -1,0 +1,7 @@
+.app {
+  width: 1180px;
+  height: 820px;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+}
