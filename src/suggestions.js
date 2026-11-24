@@ -94,7 +94,9 @@ function biggerPlan({ customer, plan, products, inOrder }) {
 
   return {
     product: next,
-    reason: `They use about ${customer.avgDataUsePercent}% of their ${plan.dataGB} GB plan most months.`,
+    // Kept vague on purpose: the customer can often see the screen, so the
+    // exact usage number stays in their plan details, not on the counter.
+    reason: 'Often close to their data limit.',
     action: 'add',
     score: 85,
   }
