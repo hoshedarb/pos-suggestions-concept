@@ -2,6 +2,7 @@
 // Devices have a `model` field so accessories can be matched via `compatibleWith`.
 // Items with `billing: 'monthly'` are charged per month.
 // `image` picks a drawing in src/components/ProductThumb.jsx.
+// `tradeIn` (on devices customers own) is the trade-in credit by condition.
 
 export const products = [
   // Phones
@@ -13,6 +14,7 @@ export const products = [
     category: 'device',
     price: 979,
     image: 'phone-apple-classic',
+    tradeIn: { good: 180, fair: 110, poor: 40 },
   },
   {
     id: 'p-iphone18pro-256',
@@ -58,6 +60,7 @@ export const products = [
     category: 'device',
     price: 1400,
     image: 'phone-samsung',
+    tradeIn: { good: 650, fair: 480, poor: 200 },
   },
   {
     id: 'p-galaxys26-512',

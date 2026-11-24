@@ -7,3 +7,8 @@ const formatter = new Intl.NumberFormat('en-CA', {
 export function money(amount) {
   return formatter.format(amount)
 }
+
+// Shorter phone name for tight spaces: "Samsung Galaxy S26" -> "Galaxy S26"
+export function shortModel(phone) {
+  return phone.model.replace(/^(Samsung|Google) /, '')
+}

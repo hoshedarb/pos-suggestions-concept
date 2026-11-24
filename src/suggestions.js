@@ -10,7 +10,7 @@
 //   action: 'swap' replaces the phone in the order, 'add' adds a new line
 //   score:  higher means more relevant. The top 3 are shown.
 
-import { money } from './format.js'
+import { money, shortModel as shortName } from './format.js'
 
 const MAX_SUGGESTIONS = 3
 
@@ -27,11 +27,6 @@ function yearsSince(dateString) {
 
 function brandOf(phone) {
   return phone.model.split(' ')[0] // "iPhone", "Samsung" or "Google"
-}
-
-// Shorter name for reasons: "Samsung Galaxy S26" -> "Galaxy S26"
-function shortName(phone) {
-  return phone.model.replace(/^(Samsung|Google) /, '')
 }
 
 function fits(accessory, phone) {
@@ -143,7 +138,7 @@ function screenProtectorForPhone({ customer, phone, orderPhone, products }) {
   let reason = `Keeps the ${shortName(phone)} screen scratch-free.`
   if (customer) {
     reason = orderPhone
-      ? `They don't have a screen protector for the new ${shortName(phone)}.`
+      ? `The new ${shortName(phone)} needs a screen protector.`
       : `They don't have a screen protector for their ${shortName(phone)}.`
   }
   return {
@@ -161,7 +156,7 @@ function protectionPlan({ customer, phone, ownedPhone, orderPhone, products }) {
   const age = ownedPhone && !orderPhone ? Math.round(yearsSince(ownedPhone.date)) : 0
   let reason = `Covers the new ${shortName(phone)} against drops and damage.`
   if (age >= 2) reason = `Their phone is about ${age} years old and has no protection plan.`
-  else if (customer) reason = `They've never had a protection plan. Covers the new ${shortName(phone)}.`
+  else if (customer) reason = `They've never had a protection plan for their phones.`
   return {
     product: plan,
     reason,
@@ -176,7 +171,7 @@ function fastCharger({ phone, orderPhone, products }) {
   return {
     product: findProduct(products, 'ad-fastcharger'),
     reason: orderPhone
-      ? `The ${shortName(phone)} doesn't come with a charger in the box.`
+      ? `The ${shortName(phone)} ships without a charger.`
       : "They haven't bought a fast charger from us.",
     action: 'add',
     score: 40,
