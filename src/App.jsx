@@ -5,6 +5,7 @@ import SuggestedItems from './components/SuggestedItems.jsx'
 import OrderPanel from './components/OrderPanel.jsx'
 import SlideInPanel from './components/SlideInPanel.jsx'
 import TradeInPanel from './components/TradeInPanel.jsx'
+import WelcomeModal from './components/WelcomeModal.jsx'
 import ProductThumb from './components/ProductThumb.jsx'
 import Icon from './components/Icon.jsx'
 import { products } from './data/products.js'
@@ -30,6 +31,10 @@ function App() {
   const [customer, setCustomer] = useState(null)
   const [lines, setLines] = useState([])
   const [openPanel, setOpenPanel] = useState(null) // 'customer', 'product', 'tradeIn' or null
+
+  // The "how to try this" guide opens every time the page loads. Nothing is
+  // saved, so it comes back on every refresh.
+  const [showWelcome, setShowWelcome] = useState(true)
 
   // Applied trade-in: { lineId, device, condition, conditionLabel, amount } or null.
   // `lineId` is the phone line it sits under.
@@ -188,6 +193,17 @@ function App() {
         onOpenTradeIn={() => setOpenPanel('tradeIn')}
         onRemoveTradeIn={() => setTradeIn(null)}
       />
+
+      <button type="button" className="how-to-link" onClick={() => setShowWelcome(true)}>
+        <Icon name="help" size={20} />
+        <span>
+          How to use
+          <br />
+          prototype
+        </span>
+      </button>
+
+      {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
     </div>
   )
 }
