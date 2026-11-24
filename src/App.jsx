@@ -4,6 +4,7 @@ import ActionTiles from './components/ActionTiles.jsx'
 import SuggestedItems from './components/SuggestedItems.jsx'
 import OrderPanel from './components/OrderPanel.jsx'
 import SlideInPanel from './components/SlideInPanel.jsx'
+import TradeInPanel from './components/TradeInPanel.jsx'
 import ProductThumb from './components/ProductThumb.jsx'
 import Icon from './components/Icon.jsx'
 import { products } from './data/products.js'
@@ -14,10 +15,44 @@ import './App.css'
 
 let nextLineId = 1
 
+// The customer's most recent phone that has trade-in values, or null.
+function findTradeInDevice(customer) {
+  if (!customer) return null
+  const owned = customer.purchaseHistory
+    .map((h) => products.find((p) => p.id === h.productId))
+    .filter((p) => p.category === 'device' && p.tradeIn)
+  return owned.at(-1) || null
+}
+
+const CONDITION_LABELS = { good: 'Good', fair: 'Fair', poor: 'Poor' }
+
 function App() {
   const [customer, setCustomer] = useState(null)
   const [lines, setLines] = useState([])
-  const [openPanel, setOpenPanel] = useState(null) // 'customer', 'product' or null
+  const [openPanel, setOpenPanel] = useState(null) // 'customer', 'product', 'tradeIn' or null
+
+  // Applied trade-in: { lineId, device, condition, conditionLabel, amount } or null.
+  // `lineId` is the phone line it sits under.
+  const [tradeIn, setTradeIn] = useState(null)
+  const tradeInDevice = findTradeInDevice(customer)
+
+  function pickCustomer(newCustomer) {
+    // A trade-in belongs to the customer who owns the old phone.
+    if (newCustomer.id !== customer?.id) setTradeIn(null)
+    setCustomer(newCustomer)
+  }
+
+  function applyTradeIn(condition, amount) {
+    const phoneLine = lines.findLast((line) => line.product.category === 'device')
+    setTradeIn({
+      lineId: phoneLine.lineId,
+      device: tradeInDevice,
+      condition,
+      conditionLabel: CONDITION_LABELS[condition],
+      amount,
+    })
+    setOpenPanel(null)
+  }
 
   // Suggestions the associate hid. Kept in memory only, so they reset on refresh.
   // dismissedIds: hidden for this order.
@@ -39,7 +74,8 @@ function App() {
   }
 
   // Replace the phone in the order (the latest one) with a different phone.
-  // If there's no phone yet, just add it.
+  // If there's no phone yet, just add it. The phone line keeps its lineId,
+  // so an applied trade-in stays with it.
   function swapPhone(newPhone) {
     setLines((current) => {
       const phoneLine = current.findLast((line) => line.product.category === 'device')
@@ -52,6 +88,8 @@ function App() {
 
   function removeLine(lineId) {
     setLines((current) => current.filter((line) => line.lineId !== lineId))
+    // Removing the phone also removes the trade-in under it.
+    if (tradeIn && tradeIn.lineId === lineId) setTradeIn(null)
   }
 
   return (
@@ -92,7 +130,7 @@ function App() {
               </div>
             )}
             onPick={(c) => {
-              setCustomer(c)
+              pickCustomer(c)
               setOpenPanel(null)
             }}
             onClose={() => setOpenPanel(null)}
@@ -127,6 +165,14 @@ function App() {
             onClose={() => setOpenPanel(null)}
           />
         )}
+
+        {openPanel === 'tradeIn' && tradeInDevice && (
+          <TradeInPanel
+            device={tradeInDevice}
+            onConfirm={applyTradeIn}
+            onClose={() => setOpenPanel(null)}
+          />
+        )}
       </main>
 
       <OrderPanel
@@ -137,6 +183,10 @@ function App() {
         onChangeCustomer={() => setOpenPanel('customer')}
         onAddProduct={() => setOpenPanel('product')}
         onRemoveLine={removeLine}
+        tradeInDevice={tradeInDevice}
+        tradeIn={tradeIn}
+        onOpenTradeIn={() => setOpenPanel('tradeIn')}
+        onRemoveTradeIn={() => setTradeIn(null)}
       />
     </div>
   )

@@ -14,6 +14,9 @@
 .workspace {
   position: relative;
   flex: 1;
+  /* Lets long suggestion reasons shorten with "…" instead of pushing
+     the order panel off the screen. */
+  min-width: 0;
   padding: 24px;
   display: flex;
   flex-direction: column;

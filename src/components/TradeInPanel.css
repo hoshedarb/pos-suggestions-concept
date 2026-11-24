@@ -1,0 +1,118 @@
+.trade-in-body {
+  flex: 1;
+  padding: 0 20px;
+  overflow-y: auto;
+}
+
+.trade-in-device {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trade-in-device .product-thumb {
+  background: var(--white);
+}
+
+.trade-in-device-name {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.trade-in-device-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--grey-500);
+}
+
+.trade-in-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trade-in-option {
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  background: var(--white);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.trade-in-option.selected {
+  border-color: var(--purple-600);
+}
+
+.trade-in-radio {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--grey-300);
+  border-radius: 50%;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trade-in-option.selected .trade-in-radio {
+  border-color: var(--purple-600);
+  background: var(--purple-600);
+}
+
+.trade-in-option-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trade-in-option-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.trade-in-option-description {
+  font-size: 13px;
+  color: var(--grey-500);
+}
+
+.trade-in-option-credit {
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-in-footer {
+  padding: 16px 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trade-in-confirm {
+  height: 48px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 24px;
+  background: var(--purple-600);
+  color: var(--white);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.trade-in-confirm:disabled {
+  background: var(--grey-300);
+  color: var(--white);
+  cursor: default;
+}

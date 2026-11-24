@@ -1,6 +1,6 @@
 import Icon from './Icon.jsx'
 import ProductThumb from './ProductThumb.jsx'
-import { money } from '../format.js'
+import { money, shortModel } from '../format.js'
 import './OrderPanel.css'
 
 const TAX_RATE = 0.13
@@ -13,11 +13,23 @@ function OrderPanel({
   onChangeCustomer,
   onAddProduct,
   onRemoveLine,
+  tradeInDevice,
+  tradeIn,
+  onOpenTradeIn,
+  onRemoveTradeIn,
 }) {
-  const subtotal = lines.reduce((sum, line) => sum + line.product.price, 0)
+  // The trade-in credit lowers the subtotal (the phone keeps its full price).
+  const itemsTotal = lines.reduce((sum, line) => sum + line.product.price, 0)
+  const credit = tradeIn ? tradeIn.amount : 0
+  const subtotal = Math.max(0, itemsTotal - credit)
   const tax = Math.round(subtotal * TAX_RATE * 100) / 100
   const total = subtotal + tax
   const isNew = !customer && lines.length === 0
+
+  // The trade-in offer shows under the latest phone in the order, if the
+  // customer owns an eligible device and no trade-in is applied yet.
+  const lastPhoneLine = lines.findLast((line) => line.product.category === 'device')
+  const showOffer = tradeInDevice && !tradeIn && lastPhoneLine
 
   return (
     <aside className="order-panel">
@@ -58,21 +70,51 @@ function OrderPanel({
           </div>
         )}
         {lines.map((line) => (
-          <div key={line.lineId} className="order-line">
-            <ProductThumb product={line.product} />
-            <div className="order-line-text">
-              <div className="order-line-name">{line.product.name}</div>
-              <div className="order-line-sku">SKU {line.product.sku}</div>
+          <div key={line.lineId}>
+            <div className="order-line">
+              <ProductThumb product={line.product} />
+              <div className="order-line-text">
+                <div className="order-line-name">{line.product.name}</div>
+                <div className="order-line-sku">SKU {line.product.sku}</div>
+              </div>
+              <div className="order-line-price">{money(line.product.price)}</div>
+              <button
+                type="button"
+                className="icon-button remove-button"
+                aria-label={`Remove ${line.product.name}`}
+                onClick={() => onRemoveLine(line.lineId)}
+              >
+                <Icon name="close" size={16} />
+              </button>
             </div>
-            <div className="order-line-price">{money(line.product.price)}</div>
-            <button
-              type="button"
-              className="icon-button remove-button"
-              aria-label={`Remove ${line.product.name}`}
-              onClick={() => onRemoveLine(line.lineId)}
-            >
-              <Icon name="close" size={16} />
-            </button>
+
+            {showOffer && line.lineId === lastPhoneLine.lineId && (
+              <button type="button" className="trade-in-offer" onClick={onOpenTradeIn}>
+                <Icon name="tradeIn" size={16} />
+                Trade in their {shortModel(tradeInDevice)}? Up to {money(tradeInDevice.tradeIn.good)} credit.
+              </button>
+            )}
+
+            {tradeIn && line.lineId === tradeIn.lineId && (
+              <div className="order-line trade-in-line">
+                <div className="trade-in-thumb">
+                  <Icon name="tradeIn" size={20} />
+                </div>
+                <div className="order-line-text">
+                  <div className="order-line-name">Trade-in credit, {shortModel(tradeIn.device)}</div>
+                  <div className="order-line-sku">{tradeIn.conditionLabel} condition</div>
+                </div>
+                <div className="order-line-price">{money(-tradeIn.amount)}</div>
+                <button
+                  type="button"
+                  className="icon-button remove-button"
+                  aria-label="Remove trade-in credit"
+                  onClick={onRemoveTradeIn}
+                >
+                  <Icon name="close" size={16} />
+                </button>
+              </div>
+            )}
           </div>
         ))}
 
