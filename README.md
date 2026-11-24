@@ -22,6 +22,7 @@ Best viewed in a landscape, tablet-sized browser window (about 1180 × 820).
 - [Smarter suggestions with reasons and swap](https://github.com/hoshedarb/pos-suggestions-concept/pull/1)
 - [Dismiss and not-relevant controls for suggestions](https://github.com/hoshedarb/pos-suggestions-concept/pull/2)
 - [Trade-in credit in the order panel](https://github.com/hoshedarb/pos-suggestions-concept/pull/3)
+- [Welcome popup, softer data-use reason, README and notes](https://github.com/hoshedarb/pos-suggestions-concept/pull/4)
 
 Where I rejected or changed AI output, and why: [NOTES.md](NOTES.md).
 
