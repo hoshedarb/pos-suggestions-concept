@@ -19,6 +19,21 @@ function App() {
   const [lines, setLines] = useState([])
   const [openPanel, setOpenPanel] = useState(null) // 'customer', 'product' or null
 
+  // Suggestions the associate hid. Kept in memory only, so they reset on refresh.
+  // dismissedIds: hidden for this order.
+  // notRelevantIds: feedback that the suggestion wasn't relevant (this session).
+  const [dismissedIds, setDismissedIds] = useState(new Set())
+  const [notRelevantIds, setNotRelevantIds] = useState(new Set())
+  const hiddenIds = new Set([...dismissedIds, ...notRelevantIds])
+
+  function dismissSuggestion(productId) {
+    setDismissedIds((current) => new Set(current).add(productId))
+  }
+
+  function markNotRelevant(productId) {
+    setNotRelevantIds((current) => new Set(current).add(productId))
+  }
+
   function addProduct(product) {
     setLines((current) => [...current, { lineId: nextLineId++, product }])
   }
@@ -54,6 +69,9 @@ function App() {
           customer={customer}
           onAdd={addProduct}
           onSwap={swapPhone}
+          hiddenIds={hiddenIds}
+          onDismiss={dismissSuggestion}
+          onNotRelevant={markNotRelevant}
         />
 
         {openPanel === 'customer' && (
