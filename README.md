@@ -78,10 +78,6 @@ A short version of these steps opens in a popup every time the prototype loads. 
 - Product images are simple drawings.
 - Charge, Import activation, Add discount, Create customer, the barcode icon and the other navigation items don't do anything.
 
-## Case study
-
-**[Case study link — coming soon](#)**
-
 ## Run it locally
 
 ```bash
