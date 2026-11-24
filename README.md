@@ -6,7 +6,7 @@ An associate-facing order screen for a store tablet, redesigned so in-store sugg
 
 ## Live demo
 
-**[Live demo link — coming soon](#)**
+**[pos-suggestions-concept.netlify.app](https://pos-suggestions-concept.netlify.app)**
 
 Best viewed in a landscape, tablet-sized browser window (about 1180 × 820).
 
