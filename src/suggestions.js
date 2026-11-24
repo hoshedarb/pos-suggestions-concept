@@ -5,7 +5,8 @@
 // The simple rules below stand in for that model, using the mock data.
 //
 // Each rule may return one suggestion: { product, reason, action, score }
-//   reason: one line the associate could say to the customer
+//   reason: one line telling the associate why it fits this customer,
+//           written about the customer ("Their current iPhone 12 case…")
 //   action: 'swap' replaces the phone in the order, 'add' adds a new line
 //   score:  higher means more relevant. The top 3 are shown.
 
@@ -26,6 +27,11 @@ function yearsSince(dateString) {
 
 function brandOf(phone) {
   return phone.model.split(' ')[0] // "iPhone", "Samsung" or "Google"
+}
+
+// Shorter name for reasons: "Samsung Galaxy S26" -> "Galaxy S26"
+function shortName(phone) {
+  return phone.model.replace(/^(Samsung|Google) /, '')
 }
 
 function fits(accessory, phone) {
@@ -58,7 +64,7 @@ function upgradeOldPhone({ ownedPhone, orderPhone, products }) {
 
   return {
     product: options[0],
-    reason: `Their ${ownedPhone.product.model} is about ${Math.round(age)} years old.`,
+    reason: `Their current ${shortName(ownedPhone.product)} is about ${Math.round(age)} years old.`,
     action: 'add', // no phone in the order yet, so there's nothing to swap
     score: 95,
   }
@@ -93,14 +99,14 @@ function biggerPlan({ customer, plan, products, inOrder }) {
 
   return {
     product: next,
-    reason: `Uses about ${customer.avgDataUsePercent}% of their ${plan.dataGB} GB plan most months.`,
+    reason: `They use about ${customer.avgDataUsePercent}% of their ${plan.dataGB} GB plan most months.`,
     action: 'add',
     score: 85,
   }
 }
 
 // A case that fits the phone they'll walk out with.
-function caseForPhone({ customer, phone, ownedPhone, owned, products }) {
+function caseForPhone({ customer, phone, ownedPhone, orderPhone, owned, products }) {
   if (!phone) return null
   const newCase = products.find((p) => isCase(p) && fits(p, phone))
   if (!newCase) return null
@@ -110,29 +116,39 @@ function caseForPhone({ customer, phone, ownedPhone, owned, products }) {
   if (oldCase && isNewPhone) {
     return {
       product: newCase,
-      reason: `Their ${ownedPhone.product.model} case won't fit the ${phone.model}.`,
+      reason: `Their current ${shortName(ownedPhone.product)} case won't fit the ${shortName(phone)}.`,
       action: 'add',
       score: 90,
     }
   }
+  let reason = `Protects the new ${shortName(phone)}.`
+  if (customer) {
+    reason = orderPhone
+      ? `They don't have a case for the new ${shortName(phone)}.`
+      : `They don't have a case for their ${shortName(phone)}.`
+  }
   return {
     product: newCase,
-    reason: customer ? `No case on file for the ${phone.model}.` : `Protects the new ${phone.model}.`,
+    reason,
     action: 'add',
     score: 65,
   }
 }
 
 // A screen protector that fits the phone.
-function screenProtectorForPhone({ customer, phone, products }) {
+function screenProtectorForPhone({ customer, phone, orderPhone, products }) {
   if (!phone) return null
   const protector = products.find((p) => isScreenProtector(p) && fits(p, phone))
   if (!protector) return null
+  let reason = `Keeps the ${shortName(phone)} screen scratch-free.`
+  if (customer) {
+    reason = orderPhone
+      ? `They don't have a screen protector for the new ${shortName(phone)}.`
+      : `They don't have a screen protector for their ${shortName(phone)}.`
+  }
   return {
     product: protector,
-    reason: customer
-      ? `No screen protector on file for the ${phone.model}.`
-      : `Keeps the ${phone.model} screen scratch-free.`,
+    reason,
     action: 'add',
     score: 60,
   }
@@ -143,9 +159,9 @@ function protectionPlan({ customer, phone, ownedPhone, orderPhone, products }) {
   if (!phone) return null
   const plan = findProduct(products, 'ad-protection')
   const age = ownedPhone && !orderPhone ? Math.round(yearsSince(ownedPhone.date)) : 0
-  let reason = `Covers the new ${phone.model} against drops and damage.`
-  if (age >= 2) reason = `Phone is about ${age} years old and has no protection plan.`
-  else if (customer) reason = `No protection plan on file. Covers the new ${phone.model}.`
+  let reason = `Covers the new ${shortName(phone)} against drops and damage.`
+  if (age >= 2) reason = `Their phone is about ${age} years old and has no protection plan.`
+  else if (customer) reason = `They've never had a protection plan. Covers the new ${shortName(phone)}.`
   return {
     product: plan,
     reason,
@@ -160,8 +176,8 @@ function fastCharger({ phone, orderPhone, products }) {
   return {
     product: findProduct(products, 'ad-fastcharger'),
     reason: orderPhone
-      ? `The ${phone.model} doesn't come with a charger in the box.`
-      : 'No fast charger on file.',
+      ? `The ${shortName(phone)} doesn't come with a charger in the box.`
+      : "They haven't bought a fast charger from us.",
     action: 'add',
     score: 40,
   }
@@ -179,7 +195,9 @@ const rules = [
 
 // ---------- main entry point ----------
 
-export function getSuggestions({ customer, lines, products }) {
+// `hiddenIds` holds products the associate dismissed or marked not relevant.
+// They're skipped, so the next-ranked suggestion moves up to fill the gap.
+export function getSuggestions({ customer, lines, products, hiddenIds = new Set() }) {
   const inOrder = lines.map((line) => line.product)
 
   // What the customer already owns, from their purchase history.
@@ -208,6 +226,8 @@ export function getSuggestions({ customer, lines, products }) {
     .filter(Boolean)
     // Never suggest something already in the order or already owned.
     .filter((s) => !inOrderIds.has(s.product.id) && !ownedIds.has(s.product.id))
+    // Skip anything the associate hid.
+    .filter((s) => !hiddenIds.has(s.product.id))
     .sort((a, b) => b.score - a.score)
     .slice(0, MAX_SUGGESTIONS)
 }
