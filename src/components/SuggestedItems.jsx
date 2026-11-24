@@ -1,16 +1,18 @@
 import Icon from './Icon.jsx'
 import ProductThumb from './ProductThumb.jsx'
 import { money } from '../format.js'
+import { getSuggestions } from '../suggestions.js'
 import './SuggestedItems.css'
 
-// "Before" behaviour: once the order has a product, always suggest the
-// single most expensive phone in the catalog. No reason, no dismiss.
-function SuggestedItems({ products, lines, customer, onAdd }) {
-  if (lines.length === 0) return null
+// Shows 2–3 ranked suggestions as soon as a customer is picked or a
+// product is added. Each has a one-line reason and an Add or Swap button.
+function SuggestedItems({ products, lines, customer, onAdd, onSwap }) {
+  if (!customer && lines.length === 0) return null
 
-  const phones = products.filter((p) => p.category === 'device')
-  const suggestion = phones.reduce((best, p) => (p.price > best.price ? p : best))
-  const firstProduct = lines[0].product
+  const suggestions = getSuggestions({ customer, lines, products })
+  if (suggestions.length === 0) return null
+
+  const firstProduct = lines[0]?.product
 
   return (
     <section className="suggested">
@@ -19,10 +21,12 @@ function SuggestedItems({ products, lines, customer, onAdd }) {
           <Icon name="sparkle" size={18} />
           Suggested items for
         </span>
-        <span className="chip">
-          <Icon name="tag" size={14} />
-          {firstProduct.name}
-        </span>
+        {firstProduct && (
+          <span className="chip">
+            <Icon name="tag" size={14} />
+            {firstProduct.name}
+          </span>
+        )}
         {customer && (
           <span className="chip">
             <Icon name="userCircle" size={14} />
@@ -31,17 +35,25 @@ function SuggestedItems({ products, lines, customer, onAdd }) {
         )}
       </div>
 
-      <div className="suggested-card">
-        <ProductThumb product={suggestion} />
-        <div className="suggested-text">
-          <div className="suggested-name">{suggestion.name}</div>
-          <div className="suggested-sku">SKU {suggestion.sku}</div>
-        </div>
-        <div className="suggested-price">{money(suggestion.price)}</div>
-        <button type="button" className="suggested-add" onClick={() => onAdd(suggestion)}>
-          Add
-        </button>
-      </div>
+      <ul className="suggested-list">
+        {suggestions.map((s) => (
+          <li key={s.product.id} className="suggested-row">
+            <ProductThumb product={s.product} size={40} />
+            <div className="suggested-text">
+              <div className="suggested-name">{s.product.name}</div>
+              <div className="suggested-reason">{s.reason}</div>
+            </div>
+            <div className="suggested-price">{money(s.product.price)}</div>
+            <button
+              type="button"
+              className="suggested-action"
+              onClick={() => (s.action === 'swap' ? onSwap(s.product) : onAdd(s.product))}
+            >
+              {s.action === 'swap' ? 'Swap' : 'Add'}
+            </button>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
