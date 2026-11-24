@@ -23,6 +23,18 @@ function App() {
     setLines((current) => [...current, { lineId: nextLineId++, product }])
   }
 
+  // Replace the phone in the order (the latest one) with a different phone.
+  // If there's no phone yet, just add it.
+  function swapPhone(newPhone) {
+    setLines((current) => {
+      const phoneLine = current.findLast((line) => line.product.category === 'device')
+      if (!phoneLine) return [...current, { lineId: nextLineId++, product: newPhone }]
+      return current.map((line) =>
+        line.lineId === phoneLine.lineId ? { ...line, product: newPhone } : line,
+      )
+    })
+  }
+
   function removeLine(lineId) {
     setLines((current) => current.filter((line) => line.lineId !== lineId))
   }
@@ -41,6 +53,7 @@ function App() {
           lines={lines}
           customer={customer}
           onAdd={addProduct}
+          onSwap={swapPhone}
         />
 
         {openPanel === 'customer' && (
