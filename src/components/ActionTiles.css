@@ -1,0 +1,80 @@
+.action-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 148px);
+  gap: 14px;
+}
+
+.action-tile {
+  position: relative;
+  overflow: hidden;
+  height: 124px;
+  border: none;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  color: var(--grey-700);
+  font: inherit;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+/* Icon and label sit above the grey fill. */
+.action-icon,
+.action-label {
+  position: relative;
+  z-index: 1;
+}
+
+.action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--grey-300);
+  color: var(--purple-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+/* Grey circle hidden at the centre of the card. When pressed it grows
+   until it covers the whole card. */
+.action-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  background: var(--tile-pressed);
+  transform: scale(0);
+}
+
+.action-tile.pressed .action-fill {
+  animation: tile-fill 300ms ease-out forwards;
+}
+
+@keyframes tile-fill {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* Pressed look: filled purple icon circle with a white icon. */
+.action-tile.pressed .action-icon {
+  background: var(--purple-600);
+  border-color: var(--purple-600);
+  color: var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-tile.pressed .action-fill {
+    animation: none;
+    transform: scale(1);
+  }
+}

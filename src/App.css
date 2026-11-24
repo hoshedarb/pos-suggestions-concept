@@ -1,7 +1,20 @@
+/* The whole screen is sized like a landscape tablet. */
 .app {
+  position: relative;
   width: 1180px;
   height: 820px;
   margin: 0 auto;
-  padding: 32px;
-  box-sizing: border-box;
+  background: var(--grey-50);
+  display: flex;
+  /* "clip" (not "hidden") stops the page jumping when a sliding panel's
+     search field gets focus mid-animation. */
+  overflow: clip;
+}
+
+.workspace {
+  position: relative;
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
 }
